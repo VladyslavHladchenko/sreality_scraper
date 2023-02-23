@@ -1,6 +1,7 @@
 # from pathlib import Path
 import scrapy
 from playwright.async_api import async_playwright
+from playwright._impl._api_types import TimeoutError
 import os
 
 
@@ -23,17 +24,21 @@ class SrealitySpider(scrapy.Spider):
             while results_count < max_results_num:
                 page = await browser.new_page()
                 page_idx+=1
-                await page.goto(f"https://www.sreality.cz/hledani/prodej/byty?strana={page_idx}")
-                images = await page.locator('//div[contains(@class, "property")]/preact/div/div/a/img[1]').all()
-                names = await page.locator('//span[contains(@class, "name")]').all()
-                
-                for i,n in zip(images, names):
-                    if results_count >= max_results_num:
-                        break
-                    results_count+=1
-                    print(f"yielding from page {page_idx}, result {results_count}/{max_results_num}")
+                try:
+                    await page.goto(f"https://www.sreality.cz/hledani/prodej/byty?strana={page_idx}")
+                    images = await page.locator('//div[contains(@class, "property")]/preact/div/div/a/img[1]').all()
+                    names = await page.locator('//span[contains(@class, "name")]').all()
                     
-                    img_src = await i.get_attribute('src')
-                    name = await n.inner_text()
-                    
-                    yield {'name':name, 'img_src':img_src}
+                    for i,n in zip(images, names):
+                        if results_count >= max_results_num:
+                            break
+                        results_count+=1
+                        print(f"yielding from page {page_idx}, result {results_count}/{max_results_num}")
+                        
+                        img_src = await i.get_attribute('src')
+                        name = await n.inner_text()
+                        
+                        yield {'name':name, 'img_src':img_src}
+                except TimeoutError:
+                    print(f'page  {page_idx} loading timeout')
+                    pass
