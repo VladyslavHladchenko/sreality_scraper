@@ -14,6 +14,6 @@ On start `server` service will:
 
 Services:
  - postgres database
- - server
+ - server (scraper + streamlit)
 
 
