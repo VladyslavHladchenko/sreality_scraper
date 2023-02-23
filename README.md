@@ -1,4 +1,4 @@
-## Flat listings scraper from sreality
+## Flat listings scraper - sreality
 
 ![Web page](./docs/page.png)
 
